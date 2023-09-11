@@ -131,6 +131,46 @@ sed -i -e "s%^address = \"tcp://localhost:1317\"%address = \"tcp://0.0.0.0:16117
 curl -L https://snapshots.kjnodes.com/noria-testnet/snapshot_latest.tar.lz4 | tar -Ilz4 -xf - -C $HOME/.noria
 [[ -f $HOME/.noria/data/upgrade-info.json ]] && cp $HOME/.noria/data/upgrade-info.json $HOME/.noria/cosmovisor/genesis/upgrade-info.json
 ```
+### Cüzdan oluşturma yada import etme
+* Yeni cüzdan
+```
+noriad keys add wallet
+```
+* İmport
+```
+noriad keys add wallet --recover
+```
 ### ve başlatalım
 ```
 sudo systemctl start noriad && sudo journalctl -u noriad -f --no-hostname -o cat
+```
+
+### Validor oluşturma
+```
+noriad tx staking create-validator \
+--amount 1000000unoria \
+--pubkey $(noriad tendermint show-validator) \
+--moniker "YOUR_MONIKER_NAME" \
+--identity "YOUR_KEYBASE_ID" \
+--details "YOUR_DETAILS" \
+--website "YOUR_WEBSITE_URL" \
+--chain-id oasis-3 \
+--commission-rate 0.05 \
+--commission-max-rate 0.20 \
+--commission-max-change-rate 0.01 \
+--min-self-delegation 1 \
+--from wallet \
+--gas-adjustment 1.4 \
+--gas auto \
+--gas-prices 0.0025ucrd \
+-y
+```
+
+### Unjail
+```
+noriad tx slashing unjail --from wallet --chain-id oasis-3 --gas-adjustment 1.4 --gas auto --gas-prices 0.0025ucrd -y
+```
+### Kendine delege
+```
+noriad tx staking delegate $(noriad keys show wallet --bech val -a) 1000000unoria --from wallet --chain-id oasis-3 --gas-adjustment 1.4 --gas auto --gas-prices 0.0025ucrd -y
+```
